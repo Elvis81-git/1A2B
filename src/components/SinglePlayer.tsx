@@ -80,19 +80,29 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
   // Submit Guess handler
   const handleGuessSubmit = (guess: string) => {
     const activeSecret = secretRef.current || secret;
+    console.log(`[1A2B Debug] --- Guess Evaluation ---`);
+    console.log(`[1A2B Debug] Guess Submitted: "${guess}"`);
+    console.log(`[1A2B Debug] Active Secret (Ref): "${secretRef.current}"`);
+    console.log(`[1A2B Debug] State Secret: "${secret}"`);
+
     let a = 0;
     let b = 0;
     for (let i = 0; i < 4; i++) {
+      console.log(`[1A2B Debug] Index ${i}: Comparing guess char "${guess[i]}" with secret char "${activeSecret[i]}"`);
       if (guess[i] === activeSecret[i]) {
         a++;
+        console.log(`[1A2B Debug] Match found at index ${i}! a = ${a}`);
       } else if (activeSecret.includes(guess[i])) {
         b++;
+        console.log(`[1A2B Debug] Character "${guess[i]}" exists elsewhere in secret! b = ${b}`);
       }
     }
 
+    console.log(`[1A2B Debug] Final Result for "${guess}": ${a}A${b}`);
+
     const newGuess: GuessItem = {
       guess,
-      result: `${a}A${b}`,
+      result: `${a}A${b}B`,
     };
 
     const nextGuesses = [...guesses, newGuess];
@@ -135,7 +145,7 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
           background: 'rgba(255, 255, 255, 0.02)',
         }}
       >
-        <div style={{ display: 'flex', gap: '20px' }}>
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Timer */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Clock size={18} style={{ color: 'var(--accent-secondary)' }} />
@@ -150,6 +160,13 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>猜測次數</span>
             <strong style={{ fontSize: '1.1rem', fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>
               {guesses.length}
+            </strong>
+          </div>
+          {/* Subtle debug helper */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '12px', background: 'rgba(255, 255, 255, 0.03)', padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🔑 謎底提示: </span>
+            <strong style={{ fontSize: '0.9rem', color: 'var(--accent-primary)', letterSpacing: '2px', fontFamily: 'Outfit' }}>
+              {secret || secretRef.current || '未生成'}
             </strong>
           </div>
         </div>

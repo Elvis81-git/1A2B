@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
     const result = calculateAB(opponent.secret, guess);
     const guessEntry = {
       guess,
-      result: `${result.A}A${result.B}`,
+      result: `${result.A}A${result.B}B`,
       a: result.A,
       b: result.B,
       timestamp: Date.now(),
