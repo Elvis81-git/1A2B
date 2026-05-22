@@ -18,6 +18,7 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
   const [timerActive, setTimerActive] = useState<boolean>(true);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const secretRef = useRef<string>('');
 
   // Generate secret number
   const generateSecret = () => {
@@ -30,6 +31,7 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
     }
     const sec = digits.join('');
     setSecret(sec);
+    secretRef.current = sec; // Set ref synchronously
     console.log('SinglePlayer Secret:', sec); // For debug/dev testing
   };
 
@@ -77,12 +79,13 @@ export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: Single
 
   // Submit Guess handler
   const handleGuessSubmit = (guess: string) => {
+    const activeSecret = secretRef.current || secret;
     let a = 0;
     let b = 0;
     for (let i = 0; i < 4; i++) {
-      if (guess[i] === secret[i]) {
+      if (guess[i] === activeSecret[i]) {
         a++;
-      } else if (secret.includes(guess[i])) {
+      } else if (activeSecret.includes(guess[i])) {
         b++;
       }
     }

@@ -155,7 +155,8 @@ export default function GameBoard({ onSubmit, disabled = false, placeholder = '�
 
       {/* On-screen Keypad */}
       <div className="keyboard-grid">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => {
+        {/* Row 1-3: Numbers 1-9 */}
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
           const strNum = num.toString();
           const isUsed = digits.includes(strNum);
           return (
@@ -170,30 +171,47 @@ export default function GameBoard({ onSubmit, disabled = false, placeholder = '�
           );
         })}
         
-        {/* Action Buttons */}
+        {/* Row 4: Reset, 0, Delete */}
         <button
           className="key-btn action"
-          style={{ gridColumn: 'span 2' }}
           disabled={disabled || digits.every(d => d === '')}
           onClick={clearDigits}
+          style={{ fontSize: '0.9rem' }}
         >
           重設
         </button>
+        
+        <button
+          className="key-btn"
+          disabled={disabled || digits.includes('0')}
+          onClick={() => handleDigitInput('0')}
+        >
+          0
+        </button>
+
         <button
           className="key-btn action"
           disabled={disabled}
           onClick={handleDelete}
           title="倒退鍵"
         >
-          <Delete size={20} />
+          <Delete size={18} />
         </button>
+
+        {/* Row 5: Submit Button (span 3) */}
         <button
           className="key-btn action"
-          style={{ gridColumn: 'span 2', background: 'linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%)', color: '#fff' }}
+          style={{ 
+            gridColumn: 'span 3', 
+            background: 'linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%)', 
+            color: '#fff',
+            fontSize: '1rem',
+            fontWeight: 700
+          }}
           disabled={disabled || digits.join('').length < 4}
           onClick={handleSubmit}
         >
-          <Send size={16} />
+          <Send size={14} style={{ marginRight: '8px' }} /> {placeholder}
         </button>
       </div>
     </div>

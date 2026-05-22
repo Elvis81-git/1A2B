@@ -329,19 +329,20 @@ body {
 /* Custom virtual keyboard styling */
 .keyboard-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  max-width: 360px;
+  max-width: 320px;
   margin: 1.5rem auto 0;
+  width: 100%;
 }
 
 .key-btn {
-  aspect-ratio: 1.2;
+  height: 48px;
   border-radius: 12px;
   border: 1px solid var(--panel-border);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 600;
   display: flex;
   align-items: center;
