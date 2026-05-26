@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { RefreshCw } from 'lucide-react';
 
 export interface GuessItem {
   guess: string;

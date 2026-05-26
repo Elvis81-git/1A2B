@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Delete, Play, Send } from 'lucide-react';
+import { Delete, Send } from 'lucide-react';
 
 interface GameBoardProps {
   onSubmit: (guess: string) => void;

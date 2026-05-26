@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
-  Users, Copy, Check, MessageSquare, Play, Send, LogOut, ArrowRight,
-  Shield, HelpCircle, User, Loader2, Award, Flame, RefreshCw, X
+  Users, Copy, Check, MessageSquare, Send, LogOut, ArrowRight,
+  User, Loader2, Award, X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { useSocket, ChatMessage } from '../hooks/useSocket';
+import { useSocket } from '../hooks/useSocket';
 import GameBoard from './GameBoard';
 import HistoryList from './HistoryList';
 
@@ -14,9 +14,8 @@ interface MultiplayerProps {
   onLose: () => void;
 }
 
-export default function Multiplayer({ onBackToMenu, onWin, onLose }: MultiplayerProps) {
+export default function Multiplayer({ onWin, onLose }: MultiplayerProps) {
   const {
-    isConnected,
     error,
     clearError,
     roomCode,
@@ -43,8 +42,6 @@ export default function Multiplayer({ onBackToMenu, onWin, onLose }: Multiplayer
     return localStorage.getItem('1a2b_nickname') || '';
   });
   const [joinCode, setJoinCode] = useState<string>('');
-  const [inputSecret, setInputSecret] = useState<string>('');
-  const [isSecretSet, setIsSecretSet] = useState<boolean>(false);
   const [chatInput, setChatInput] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [showChat, setShowChat] = useState<boolean>(false);
@@ -120,7 +117,6 @@ export default function Multiplayer({ onBackToMenu, onWin, onLose }: Multiplayer
   // Handle Submit Secret Number
   const handleSecretSubmit = (secret: string) => {
     submitSecret(secret);
-    setIsSecretSet(true);
   };
 
   // Opponent reference
@@ -463,8 +459,8 @@ export default function Multiplayer({ onBackToMenu, onWin, onLose }: Multiplayer
     );
   }
 
-  // Active game race mode (Playing)
-  if (gameState === 'playing') {
+  // Active game race mode (Playing or Finished)
+  if (gameState === 'playing' || gameState === 'finished') {
     const oppGuessesCount = opponentGuesses.length;
     const oppBestResult = opponentGuesses.length > 0 ? opponentGuesses[opponentGuesses.length - 1].bestResult : '0A0B';
     const oppLastGuess = opponentGuesses.length > 0 ? opponentGuesses[opponentGuesses.length - 1].guess : '無';
@@ -529,7 +525,7 @@ export default function Multiplayer({ onBackToMenu, onWin, onLose }: Multiplayer
           {/* Left panel: Your board */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <GameBoard onSubmit={submitGuess} label="破解對手的謎底" />
+              <GameBoard onSubmit={submitGuess} label="破解對手的謎底" disabled={gameState === 'finished'} />
             </div>
             <HistoryList guesses={guesses} title="您的猜測歷史" />
           </div>
@@ -690,138 +686,132 @@ export default function Multiplayer({ onBackToMenu, onWin, onLose }: Multiplayer
                 )}
                 <div ref={chatEndRef} />
               </div>
-
-              {/* Chat Input form */}
-              <form onSubmit={handleSendChat} style={{ display: 'flex', gap: '6px' }}>
+              <form onSubmit={handleSendChat} style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
                   className="input-text"
                   placeholder="輸入訊息..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem' }}
                 />
-                <button type="submit" className="btn btn-primary" style={{ padding: '8px 14px' }}>
-                  <Send size={14} />
+                <button type="submit" className="btn btn-primary" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Send size={14} /> 發送
                 </button>
               </form>
             </div>
           )}
         </div>
-      </div>
-    );
-  }
 
-  // Game Finished Mode (Finished overlay)
-  if (gameState === 'finished' && winnerInfo) {
-    const isWinner = winnerInfo.id === myId;
-
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(12px)',
-          zIndex: 90,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1.5rem',
-        }}
-      >
-        <div
-          className="glass-panel"
-          style={{
-            width: '100%',
-            maxWidth: '450px',
-            padding: '2.5rem',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1.5rem',
-            boxShadow: isWinner ? '0 25px 60px rgba(16, 185, 129, 0.2)' : '0 25px 60px rgba(239, 68, 68, 0.2)',
-            border: `1px solid ${isWinner ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-            animation: 'scaleInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-          }}
-        >
+        {/* Win/Lose Modal Overlay */}
+        {gameState === 'finished' && winnerInfo && (
           <div
             style={{
-              width: '72px',
-              height: '72px',
-              borderRadius: '50%',
-              background: isWinner ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(12px)',
+              zIndex: 90,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: isWinner ? 'var(--status-success)' : 'var(--status-danger)',
-              marginBottom: '0.5rem',
+              padding: '1.5rem',
             }}
           >
-            <Award size={40} />
-          </div>
-
-          <div>
-            <h2 style={{ fontSize: '1.85rem', fontWeight: 800, marginBottom: '0.5rem', color: isWinner ? 'var(--status-success)' : 'var(--status-danger)' }}>
-              {isWinner ? '🏆 您贏得了勝利！' : '💀 敗北...'}
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              {isWinner 
-                ? `恭喜您！先於對手破解了對方的守城密碼！`
-                : `對手 ${winnerInfo.name} 率先解開了您的秘密防線！`}
-            </p>
-          </div>
-
-          {/* Reveal Secrets Card */}
-          <div
-            className="glass-panel"
-            style={{
-              width: '100%',
-              padding: '1.25rem',
-              background: 'rgba(255, 255, 255, 0.02)',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '12px',
-            }}
-          >
-            <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>對手密碼 ({opponent?.nickname})</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-secondary)', letterSpacing: '3px', marginTop: '4px' }}>
-                {opponentSecret}
+            <div
+              className="glass-panel"
+              style={{
+                width: '100%',
+                maxWidth: '450px',
+                padding: '2.5rem',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem',
+                boxShadow: winnerInfo.id === myId ? '0 25px 60px rgba(16, 185, 129, 0.2)' : '0 25px 60px rgba(239, 68, 68, 0.2)',
+                border: `1px solid ${winnerInfo.id === myId ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                animation: 'scaleInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+              }}
+            >
+              <div
+                style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  background: winnerInfo.id === myId ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: winnerInfo.id === myId ? 'var(--status-success)' : 'var(--status-danger)',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <Award size={40} />
               </div>
-            </div>
-            <div style={{ borderLeft: '1px solid var(--panel-border)' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>您的密碼 ({me?.nickname})</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '3px', marginTop: '4px' }}>
-                {playerSecret}
-              </div>
-            </div>
-            
-            <div style={{ borderTop: '1px solid var(--panel-border)', gridColumn: 'span 2', paddingTop: '10px', marginTop: '4px', display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem' }}>
+
               <div>
-                <span style={{ color: 'var(--text-muted)' }}>您猜了: </span>
-                <strong style={{ color: 'var(--text-primary)' }}>{guesses.length} 次</strong>
+                <h2 style={{ fontSize: '1.85rem', fontWeight: 800, marginBottom: '0.5rem', color: winnerInfo.id === myId ? 'var(--status-success)' : 'var(--status-danger)' }}>
+                  {winnerInfo.id === myId ? '🏆 您贏得了勝利！' : '💀 敗北...'}
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                  {winnerInfo.id === myId 
+                    ? `恭喜您！先於對手破解了對方的守城密碼！`
+                    : `對手 ${winnerInfo.name} 率先解開了您的秘密防線！`}
+                </p>
               </div>
-              <div style={{ borderLeft: '1px solid var(--panel-border)', paddingLeft: '20px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>對手猜了: </span>
-                <strong style={{ color: 'var(--text-primary)' }}>{opponentGuesses.length} 次</strong>
+
+              {/* Reveal Secrets Card */}
+              <div
+                className="glass-panel"
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>對手密碼 ({opponent?.nickname})</div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-secondary)', letterSpacing: '3px', marginTop: '4px' }}>
+                    {opponentSecret}
+                  </div>
+                </div>
+                <div style={{ borderLeft: '1px solid var(--panel-border)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>您的密碼 ({me?.nickname})</div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '3px', marginTop: '4px' }}>
+                    {playerSecret}
+                  </div>
+                </div>
+                
+                <div style={{ borderTop: '1px solid var(--panel-border)', gridColumn: 'span 2', paddingTop: '10px', marginTop: '4px', display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem' }}>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>您猜了: </span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{guesses.length} 次</strong>
+                  </div>
+                  <div style={{ borderLeft: '1px solid var(--panel-border)', paddingLeft: '20px' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>對手猜了: </span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{opponentGuesses.length} 次</strong>
+                  </div>
+                </div>
               </div>
+
+              {/* Action Buttons */}
+              <button
+                className="btn btn-primary"
+                style={{ width: '100%', marginTop: '0.5rem' }}
+                onClick={disconnect}
+              >
+                返回大廳
+              </button>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <button
-            className="btn btn-primary"
-            style={{ width: '100%', marginTop: '0.5rem' }}
-            onClick={disconnect}
-          >
-            返回大廳
-          </button>
-        </div>
+        )}
       </div>
     );
   }

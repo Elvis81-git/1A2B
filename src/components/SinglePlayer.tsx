@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { RefreshCw, Clock, Flame, Award, CheckCircle, Home } from 'lucide-react';
+import { RefreshCw, Clock, Flame, Award, Home } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import GameBoard from './GameBoard';
 import HistoryList, { GuessItem } from './HistoryList';
@@ -10,7 +10,7 @@ interface SinglePlayerProps {
   onGameOver: () => void;
 }
 
-export default function SinglePlayer({ onBackToMenu, onWin, onGameOver }: SinglePlayerProps) {
+export default function SinglePlayer({ onBackToMenu, onWin }: SinglePlayerProps) {
   const [secret, setSecret] = useState<string>('');
   const [guesses, setGuesses] = useState<GuessItem[]>([]);
   const [isWin, setIsWin] = useState<boolean>(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HelpCircle, Moon, Sun, ArrowLeft, Gamepad2, Award } from 'lucide-react';
+import { HelpCircle, Moon, Sun, ArrowLeft } from 'lucide-react';
 import ModeSelector from './components/ModeSelector';
 import SinglePlayer from './components/SinglePlayer';
 import Multiplayer from './components/Multiplayer';
